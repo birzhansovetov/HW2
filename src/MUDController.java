@@ -8,7 +8,6 @@ public class MUDController {
     private boolean running;
 
     public MUDController(Player player) {
-        // Initialize fields here (if needed)
         this.player = player;
         this.running = true;
     }
@@ -16,6 +15,7 @@ public class MUDController {
     public void runGameLoop() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to the Game! ");
+        System.out.println("Write help for a list of commands");
         while (running) {
             System.out.println("> ");
             String input = scanner.nextLine();
@@ -41,7 +41,7 @@ public class MUDController {
         } else if (command.equals("pick") && action.equals("up")) {
             pickUp(arguments);
         } else if (command.equals("inventory")) {
-            checkInventory(player);
+            checkInventory();
         } else if (command.equals("help")) {
             showHelp();
         } else if (command.equals("quit")) {
@@ -54,59 +54,31 @@ public class MUDController {
 
 
     private void lookAround() {
-        Room currentRoom = player.getCurrentRoom();
-        System.out.println(currentRoom.describe());
-        List<Item> items = currentRoom.getItems();
-        if (items.isEmpty()){
-            System.out.println("There are no items in this room");
-        }else {
-            for (Item item : items) {
-                System.out.println("Item: " + item.getName());
-
-            }
-        }
-        if (!currentRoom.getExits().isEmpty()){
-            System.out.println("Exits: " + String.join(", ", currentRoom.getExits().keySet()));
-       }else {
-           System.out.println("There are no exits in this room");
-       }
+        System.out.println("You are at" + player.getCurrentLocation());
     }
 
     private void move(String direction) {
-        Room currentRoom = player.getCurrentRoom();
-        Room nextRoom = currentRoom.getExit(direction);
-        if (nextRoom != null) {
-            player.setCurrentRoom(nextRoom);
-            System.out.println("Moved " + direction + " to " + nextRoom.getName());
-        }else {
-            System.out.println("No exits at " + direction);
+        if (direction.isEmpty()) {
+            System.out.println("Move where? (north, south, east, west)");
+            return;
         }
+        player.setCurrentLocation("Moved " + direction);
+        System.out.println("You moved " + direction + ".");
     }
 
 
-    private void pickUp(String arg) {
-        String name = arg.startsWith("up") ? arg.substring(3) : arg;
-        Room currentRoom = player.getCurrentRoom();
-        Item item = currentRoom.getItem(name);
-        if (item != null) {
-            System.out.println("Picked up " + name);
-        }else {
-            System.out.println("No such item " + name);
+    private void pickUp(String item) {
+        if (item.isEmpty()) {
+            System.out.println("Pick up what?");
+            return;
         }
         player.addItem(item);
-
-        currentRoom.removeItem(item);
+        System.out.println("You picked up: " + item);
 
     }
 
-    private void checkInventory(Player inventory) {
-        if (inventory == null) {
-            System.out.println("You don't have any items");
-        }else {
-           for (Item item : inventory.getItems()) {
-               System.out.println(item.getName());
-           }
-        }
+    private void checkInventory() {
+       player.checkInventory();
     }
 
     private void showHelp() {
